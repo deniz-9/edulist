@@ -4,15 +4,16 @@ import StudentForm from "./components/StudentForm";
 import CourseForm from "./components/CourseForm";
 import ExamResultForm from "./components/ExamResultForm";
 import StudentList from "./components/StudentList";
+import { FaUsers, FaUserPlus, FaBook, FaClipboardList } from "react-icons/fa";
 
 function App() {
   const [activeTab, setActiveTab] = useState("students");
 
   const tabs = [
-    { id: "students", label: "Öğrenci Listesi", icon: "👥" },
-    { id: "addStudent", label: "Öğrenci Ekle", icon: "➕" },
-    { id: "addCourse", label: "Ders Ekle", icon: "📚" },
-    { id: "addExam", label: "Sınav Notu Ekle", icon: "📝" },
+    { id: "students", label: "Öğrenci Listesi", icon: FaUsers },
+    { id: "addStudent", label: "Öğrenci Ekle", icon: FaUserPlus },
+    { id: "addCourse", label: "Ders Ekle", icon: FaBook },
+    { id: "addExam", label: "Sınav Notu Ekle", icon: FaClipboardList },
   ];
 
   return (
@@ -31,13 +32,13 @@ function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 px-4 py-2 rounded-md font-medium transition duration-200 ${
+                  className={`flex-1 px-4 py-2 rounded-md font-medium transition duration-200 flex items-center justify-center ${
                     activeTab === tab.id
                       ? "bg-blue-600 text-white shadow-md"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
-                  <span className="mr-2">{tab.icon}</span>
+                  <tab.icon className="mr-2" />
                   {tab.label}
                 </button>
               ))}

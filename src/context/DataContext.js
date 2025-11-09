@@ -158,6 +158,30 @@ export const DataProvider = ({ children }) => {
     );
   }, []);
 
+  const updateStudent = useCallback((studentId, updatedStudent) => {
+    setStudents((prevStudents) =>
+      prevStudents.map((s) =>
+        s.id === studentId ? { ...s, ...updatedStudent } : s
+      )
+    );
+  }, []);
+
+  const updateCourse = useCallback((courseId, updatedCourse) => {
+    setCourses((prevCourses) =>
+      prevCourses.map((c) =>
+        c.id === courseId ? { ...c, ...updatedCourse } : c
+      )
+    );
+  }, []);
+
+  const updateExamResult = useCallback((examResultId, updatedExamResult) => {
+    setExamResults((prevExamResults) =>
+      prevExamResults.map((er) =>
+        er.id === examResultId ? { ...er, ...updatedExamResult } : er
+      )
+    );
+  }, []);
+
   const getCompletedCourses = useCallback(
     (studentId) => {
       const studentResults = examResults.filter(
@@ -203,6 +227,9 @@ export const DataProvider = ({ children }) => {
       deleteStudent,
       deleteCourse,
       deleteExamResult,
+      updateStudent,
+      updateCourse,
+      updateExamResult,
       getCompletedCourses,
     }),
     [
@@ -215,6 +242,9 @@ export const DataProvider = ({ children }) => {
       deleteStudent,
       deleteCourse,
       deleteExamResult,
+      updateStudent,
+      updateCourse,
+      updateExamResult,
       getCompletedCourses,
     ]
   );

@@ -9,6 +9,7 @@ import {
   MESSAGES,
 } from "../utils";
 import { Input, Button, Message } from "../ui";
+import { FaUserPlus } from "react-icons/fa";
 
 const StudentForm = () => {
   const { students, addStudent } = useData();
@@ -52,7 +53,7 @@ const StudentForm = () => {
     }
 
     const emailError = validateEmail(formData.email);
-    if (emailError && !formData.email.includes("@")) {
+    if (emailError) {
       newErrors.email = emailError;
     }
 
@@ -123,7 +124,8 @@ const StudentForm = () => {
           message={errors.general || message}
           getMessageClass={getMessageClass}
         />
-        <Button type="submit" variant="primary">
+        <Button type="submit" variant="primary" className="flex items-center justify-center">
+          <FaUserPlus className="mr-2" />
           Öğrenci Ekle
         </Button>
       </form>

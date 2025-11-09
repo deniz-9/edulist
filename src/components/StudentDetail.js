@@ -1,23 +1,56 @@
-import React from 'react';
-import { useData } from '../context/DataContext';
+import React, { useState } from "react";
+import { useData } from "../context/DataContext";
+import { FaCheck, FaTimes, FaEdit, FaTrash } from "react-icons/fa";
 
 const StudentDetail = ({ student }) => {
-  const { examResults, courses, getCompletedCourses, deleteExamResult } = useData();
-  
-  const studentResults = examResults.filter(er => er.student_id === student.id);
+  const {
+    examResults,
+    courses,
+    getCompletedCourses,
+    deleteExamResult,
+    updateExamResult,
+  } = useData();
+  const [editingResult, setEditingResult] = useState(null);
+  const [editScore, setEditScore] = useState("");
+
+  const studentResults = examResults.filter(
+    (er) => er.student_id === student.id
+  );
   const completedCourses = getCompletedCourses(student.id);
 
   const getCourseName = (courseId) => {
-    const course = courses.find(c => c.id === courseId);
-    return course ? course.name : 'Bilinmeyen Ders';
+    const course = courses.find((c) => c.id === courseId);
+    return course ? course.name : "Bilinmeyen Ders";
   };
 
   const getCourseResults = (courseId) => {
-    return studentResults.filter(er => er.course_id === courseId);
+    return studentResults.filter((er) => er.course_id === courseId);
+  };
+
+  const handleEditClick = (result) => {
+    setEditingResult(result.id);
+    setEditScore(result.score.toString());
+  };
+
+  const handleEditSubmit = (resultId) => {
+    const score = parseFloat(editScore);
+    if (isNaN(score) || score < 0 || score > 100) {
+      alert("Not 0-100 arasında olmalıdır.");
+      return;
+    }
+
+    updateExamResult(resultId, { score: score });
+    setEditingResult(null);
+    setEditScore("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingResult(null);
+    setEditScore("");
   };
 
   const courseStats = {};
-  studentResults.forEach(result => {
+  studentResults.forEach((result) => {
     if (!courseStats[result.course_id]) {
       courseStats[result.course_id] = [];
     }
@@ -27,9 +60,11 @@ const StudentDetail = ({ student }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4 text-gray-800">Öğrenci Detayı</h2>
-      
+
       <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2 text-gray-700">Kişisel Bilgiler</h3>
+        <h3 className="text-lg font-semibold mb-2 text-gray-700">
+          Kişisel Bilgiler
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <span className="text-sm text-gray-600">Ad Soyad:</span>
@@ -52,20 +87,29 @@ const StudentDetail = ({ student }) => {
 
       {completedCourses.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3 text-gray-700">Tamamlanan Dersler ve Ortalamalar</h3>
+          <h3 className="text-lg font-semibold mb-3 text-gray-700">
+            Tamamlanan Dersler ve Ortalamalar
+          </h3>
           <div className="space-y-3">
             {completedCourses.map((item, index) => (
-              <div key={index} className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div
+                key={index}
+                className="p-4 bg-green-50 border border-green-200 rounded-lg"
+              >
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="font-semibold text-gray-900">{item.course.name}</h4>
+                    <h4 className="font-semibold text-gray-900">
+                      {item.course.name}
+                    </h4>
                     <p className="text-sm text-gray-600">
-                      Notlar: {item.scores.join(', ')}
+                      Notlar: {item.scores.join(", ")}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-600">Ortalama</p>
-                    <p className="text-2xl font-bold text-green-600">{item.average}</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {item.average}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -75,7 +119,9 @@ const StudentDetail = ({ student }) => {
       )}
 
       <div>
-        <h3 className="text-lg font-semibold mb-3 text-gray-700">Tüm Sınav Sonuçları</h3>
+        <h3 className="text-lg font-semibold mb-3 text-gray-700">
+          Tüm Sınav Sonuçları
+        </h3>
         {studentResults.length === 0 ? (
           <p className="text-gray-500">Henüz sınav sonucu bulunmamaktadır.</p>
         ) : (
@@ -84,14 +130,14 @@ const StudentDetail = ({ student }) => {
               const courseIdNum = parseInt(courseId);
               const results = getCourseResults(courseIdNum);
               const isCompleted = results.length >= 3;
-              
+
               return (
                 <div
                   key={courseId}
                   className={`p-4 border rounded-lg ${
                     isCompleted
-                      ? 'bg-green-50 border-green-200'
-                      : 'bg-gray-50 border-gray-200'
+                      ? "bg-green-50 border-green-200"
+                      : "bg-gray-50 border-gray-200"
                   }`}
                 >
                   <div className="flex justify-between items-start mb-2">
@@ -110,25 +156,70 @@ const StudentDetail = ({ student }) => {
                         key={result.id}
                         className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded text-sm font-medium"
                       >
-                        <span>{result.score}</span>
-                        <button
-                          onClick={() => {
-                            if (window.confirm(`Bu sınav notunu (${result.score}) silmek istediğinize emin misiniz?`)) {
-                              deleteExamResult(result.id);
-                            }
-                          }}
-                          className="text-red-600 hover:text-red-800 ml-1"
-                          title="Notu Sil"
-                        >
-                          ×
-                        </button>
+                        {editingResult === result.id ? (
+                          <>
+                            <input
+                              type="number"
+                              value={editScore}
+                              onChange={(e) => setEditScore(e.target.value)}
+                              min="0"
+                              max="100"
+                              step="0.01"
+                              className="w-16 px-2 py-1 border border-gray-300 rounded text-sm"
+                              autoFocus
+                            />
+                            <button
+                              onClick={() => handleEditSubmit(result.id)}
+                              className="text-green-600 hover:text-green-800 ml-1"
+                              title="Kaydet"
+                            >
+                              <FaCheck />
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="text-gray-600 hover:text-gray-800 ml-1"
+                              title="İptal"
+                            >
+                              <FaTimes />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span>{result.score}</span>
+                            <button
+                              onClick={() => handleEditClick(result)}
+                              className="text-blue-600 hover:text-blue-800 ml-1"
+                              title="Düzenle"
+                            >
+                              <FaEdit />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    `Bu sınav notunu (${result.score}) silmek istediğinize emin misiniz?`
+                                  )
+                                ) {
+                                  deleteExamResult(result.id);
+                                }
+                              }}
+                              className="text-red-600 hover:text-red-800 ml-1"
+                              title="Notu Sil"
+                            >
+                              <FaTrash />
+                            </button>
+                          </>
+                        )}
                       </div>
                     ))}
                   </div>
                   {results.length > 0 && (
                     <p className="text-sm text-gray-600 mt-2">
                       Toplam: {results.length} not
-                      {results.length < 3 && ` (${3 - results.length} not daha tamamlanması gerekiyor)`}
+                      {results.length < 3 &&
+                        ` (${
+                          3 - results.length
+                        } not daha tamamlanması gerekiyor)`}
                     </p>
                   )}
                 </div>
@@ -142,4 +233,3 @@ const StudentDetail = ({ student }) => {
 };
 
 export default StudentDetail;
-

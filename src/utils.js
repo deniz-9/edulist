@@ -12,7 +12,18 @@ export const MESSAGES = {
 };
 
 export const VALIDATION_MESSAGES = {
+  EMAIL_EMPTY: "E-posta adresi boş olamaz.",
   EMAIL_REQUIRES_AT: "E-posta adresi @ işareti içermelidir.",
+  EMAIL_INVALID_FORMAT: "Geçerli bir e-posta adresi giriniz.",
+  EMAIL_NO_LOCAL_PART:
+    "E-posta adresinde @ işaretinden önce en az bir karakter olmalıdır.",
+  EMAIL_NO_DOMAIN:
+    "E-posta adresinde @ işaretinden sonra domain adı olmalıdır.",
+  EMAIL_NO_DOT: "E-posta adresinde domain kısmında nokta (.) olmalıdır.",
+  EMAIL_INVALID_DOMAIN:
+    "Domain uzantısı en az 2 karakter olmalıdır (örn: .com, .edu).",
+  EMAIL_INVALID_CHARS: "E-posta adresinde geçersiz karakterler bulunmaktadır.",
+  EMAIL_TOO_LONG: "E-posta adresi çok uzun (maksimum 254 karakter).",
   GSM_EMPTY: "GSM numarası boş olamaz.",
   GSM_MAX_LENGTH: "GSM numarası en fazla 12 basamaklı olmalıdır.",
   DUPLICATE_NAME: "Bu ad soyad ile kayıtlı bir öğrenci zaten mevcut.",
@@ -26,9 +37,77 @@ const SCORE_MIN = 0;
 const SCORE_MAX = 100;
 
 export const validateEmail = (email) => {
-  if (!email || !email.includes("@")) {
+  if (!email || email.trim() === "") {
+    return VALIDATION_MESSAGES.EMAIL_EMPTY;
+  }
+
+  const trimmedEmail = email.trim();
+
+  if (trimmedEmail.length > 254) {
+    return VALIDATION_MESSAGES.EMAIL_TOO_LONG;
+  }
+
+  if (!trimmedEmail.includes("@")) {
     return VALIDATION_MESSAGES.EMAIL_REQUIRES_AT;
   }
+
+  const parts = trimmedEmail.split("@");
+  if (parts.length !== 2) {
+    return VALIDATION_MESSAGES.EMAIL_INVALID_FORMAT;
+  }
+
+  const [localPart, domain] = parts;
+
+  if (!localPart || localPart.length === 0) {
+    return VALIDATION_MESSAGES.EMAIL_NO_LOCAL_PART;
+  }
+
+  if (localPart.length > 64) {
+    return VALIDATION_MESSAGES.EMAIL_INVALID_FORMAT;
+  }
+
+  if (!domain || domain.length === 0) {
+    return VALIDATION_MESSAGES.EMAIL_NO_DOMAIN;
+  }
+
+  if (!domain.includes(".")) {
+    return VALIDATION_MESSAGES.EMAIL_NO_DOT;
+  }
+
+  const domainParts = domain.split(".");
+  const extension = domainParts[domainParts.length - 1];
+  if (!extension || extension.length < 2) {
+    return VALIDATION_MESSAGES.EMAIL_INVALID_DOMAIN;
+  }
+
+  const localPartRegex = /^[a-zA-Z0-9._+-]+$/;
+  const domainRegex = /^[a-zA-Z0-9.-]+$/;
+
+  if (!localPartRegex.test(localPart)) {
+    return VALIDATION_MESSAGES.EMAIL_INVALID_CHARS;
+  }
+
+  if (!domainRegex.test(domain)) {
+    return VALIDATION_MESSAGES.EMAIL_INVALID_CHARS;
+  }
+
+  if (localPart.startsWith(".") || localPart.endsWith(".")) {
+    return VALIDATION_MESSAGES.EMAIL_INVALID_FORMAT;
+  }
+
+  if (
+    domain.startsWith(".") ||
+    domain.endsWith(".") ||
+    domain.startsWith("-") ||
+    domain.endsWith("-")
+  ) {
+    return VALIDATION_MESSAGES.EMAIL_INVALID_FORMAT;
+  }
+
+  if (localPart.includes("..") || domain.includes("..")) {
+    return VALIDATION_MESSAGES.EMAIL_INVALID_FORMAT;
+  }
+
   return null;
 };
 
@@ -73,7 +152,8 @@ export const checkStudentDuplicates = (formData, students) => {
     errors.number = VALIDATION_MESSAGES.DUPLICATE_NUMBER;
   }
 
-  if (formData.email?.includes("@")) {
+  const emailValidationError = validateEmail(formData.email);
+  if (!emailValidationError && normalizedEmail) {
     const duplicateEmail = students.find(
       (student) => student.email.toLowerCase().trim() === normalizedEmail
     );
@@ -110,4 +190,3 @@ export const getMessageClass = (message) => {
     ? "bg-green-100 text-green-700"
     : "bg-red-100 text-red-700";
 };
-

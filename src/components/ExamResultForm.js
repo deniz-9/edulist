@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
+import { FaPlus } from 'react-icons/fa';
 
 const ExamResultForm = () => {
   const { students, courses, addExamResult } = useData();
@@ -109,8 +110,9 @@ const ExamResultForm = () => {
         )}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 font-medium"
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 font-medium flex items-center justify-center"
         >
+          <FaPlus className="mr-2" />
           Not Ekle
         </button>
       </form>
